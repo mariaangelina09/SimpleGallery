@@ -2,7 +2,7 @@
 //  SimpleGalleryTests.swift
 //  SimpleGalleryTests
 //
-//  Created by Kristiawan Adi on 18/10/23.
+//  Created by Maria Angelina on 18/10/23.
 //
 
 import XCTest
