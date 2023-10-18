@@ -34,10 +34,54 @@ class NetworkManager {
 
             do {
                 let decoder = JSONDecoder()
-                let response = try decoder.decode(ArtworkData.self, from: data)
+                decoder.keyDecodingStrategy = .convertFromSnakeCase
+                decoder.dateDecodingStrategy = .secondsSince1970
                 
-                let artworks = response.artworks.map { artworkData in
-                    return Artwork(title: artworkData.title, imageIdentifier: artworkData.imageIdentifier)
+                let artworkData = try decoder.decode(ArtworkData.self, from: data)
+                print(artworkData)
+                let artworks = artworkData.data.map { artwork in
+                    return Artwork(id: artwork.id,
+                                   title: artwork.title,
+                                   thumbnail: artwork.thumbnail,
+                                   artistDisplay: artwork.artistDisplay,
+                                   placeOfOrigin: artwork.placeOfOrigin,
+                                   dimensionsDetail: artwork.dimensionsDetail,
+                                   mediumDisplay: artwork.mediumDisplay,
+                                   creditLine: artwork.creditLine,
+                                   catalogueDisplay: artwork.catalogueDisplay,
+                                   publicationHistory: artwork.publicationHistory,
+                                   exhibitionHistory: artwork.exhibitionHistory,
+                                   provenanceText: artwork.provenanceText,
+                                   edition: artwork.edition,
+                                   publishingVerificationLevel: artwork.publishingVerificationLevel,
+                                   internalDepartmentID: artwork.internalDepartmentID,
+                                   copyrightNotice: artwork.copyrightNotice,
+                                   color: artwork.color,
+                                   onLoanDisplay: artwork.onLoanDisplay,
+                                   galleryTitle: artwork.galleryTitle,
+                                   galleryID: artwork.galleryID,
+                                   nomismaID: artwork.nomismaID,
+                                   artworkTypeTitle: artwork.artworkTypeTitle,
+                                   artworkTypeID: artwork.artworkTypeID,
+                                   departmentTitle: artwork.departmentTitle,
+                                   departmentID: artwork.departmentID,
+                                   artistID: artwork.artistID,
+                                   artistTitle: artwork.artistTitle,
+                                   termTitles: artwork.termTitles,
+                                   classificationID: artwork.classificationID,
+                                   classificationTitle: artwork.classificationTitle,
+                                   altClassificationIDS: artwork.altClassificationIDS,
+                                   classificationIDS: artwork.classificationIDS,
+                                   classificationTitles: artwork.classificationTitles,
+                                   materialID: artwork.materialID,
+                                   altMaterialIDS: artwork.altMaterialIDS,
+                                   materialIDS: artwork.materialIDS,
+                                   materialTitles: artwork.materialTitles,
+                                   imageID: artwork.imageID,
+                                   suggestAutocompleteAll: artwork.suggestAutocompleteAll,
+                                   sourceUpdatedAt: artwork.sourceUpdatedAt,
+                                   updatedAt: artwork.updatedAt,
+                                   timestamp: artwork.timestamp)
                 }
 
                 completion(artworks, nil)
@@ -71,8 +115,49 @@ class NetworkManager {
                 let decoder = JSONDecoder()
                 let response = try decoder.decode(ArtworkData.self, from: data)
                 
-                let artworks = response.artworks.map { artworkData in
-                    return Artwork(title: artworkData.title, imageIdentifier: artworkData.imageIdentifier)
+                let artworks = artworkData.data.map { artwork in
+                    return Artwork(id: artwork.id,
+                                   title: artwork.title,
+                                   thumbnail: artwork.thumbnail,
+                                   artistDisplay: artwork.artistDisplay,
+                                   placeOfOrigin: artwork.placeOfOrigin,
+                                   dimensionsDetail: artwork.dimensionsDetail,
+                                   mediumDisplay: artwork.mediumDisplay,
+                                   creditLine: artwork.creditLine,
+                                   catalogueDisplay: artwork.catalogueDisplay,
+                                   publicationHistory: artwork.publicationHistory,
+                                   exhibitionHistory: artwork.exhibitionHistory,
+                                   provenanceText: artwork.provenanceText,
+                                   edition: artwork.edition,
+                                   publishingVerificationLevel: artwork.publishingVerificationLevel,
+                                   internalDepartmentID: artwork.internalDepartmentID,
+                                   copyrightNotice: artwork.copyrightNotice,
+                                   color: artwork.color,
+                                   onLoanDisplay: artwork.onLoanDisplay,
+                                   galleryTitle: artwork.galleryTitle,
+                                   galleryID: artwork.galleryID,
+                                   nomismaID: artwork.nomismaID,
+                                   artworkTypeTitle: artwork.artworkTypeTitle,
+                                   artworkTypeID: artwork.artworkTypeID,
+                                   departmentTitle: artwork.departmentTitle,
+                                   departmentID: artwork.departmentID,
+                                   artistID: artwork.artistID,
+                                   artistTitle: artwork.artistTitle,
+                                   termTitles: artwork.termTitles,
+                                   classificationID: artwork.classificationID,
+                                   classificationTitle: artwork.classificationTitle,
+                                   altClassificationIDS: artwork.altClassificationIDS,
+                                   classificationIDS: artwork.classificationIDS,
+                                   classificationTitles: artwork.classificationTitles,
+                                   materialID: artwork.materialID,
+                                   altMaterialIDS: artwork.altMaterialIDS,
+                                   materialIDS: artwork.materialIDS,
+                                   materialTitles: artwork.materialTitles,
+                                   imageID: artwork.imageID,
+                                   suggestAutocompleteAll: artwork.suggestAutocompleteAll,
+                                   sourceUpdatedAt: artwork.sourceUpdatedAt,
+                                   updatedAt: artwork.updatedAt,
+                                   timestamp: artwork.timestamp)
                 }
                 
                 completion(artworks, nil)
