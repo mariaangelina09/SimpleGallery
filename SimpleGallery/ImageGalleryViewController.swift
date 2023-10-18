@@ -90,8 +90,10 @@ class ImageGalleryViewController: UIViewController {
             }
             self?.artworks += artworks
             self?.currentPage += 1
-            //            self?.tableView.reloadData()
-            self?.collectionView.reloadData()
+            
+            DispatchQueue.main.async {
+                self?.collectionView.reloadData()
+            }
         }
     }
 }
@@ -143,7 +145,7 @@ extension ImageGalleryViewController: UITableViewDelegate, UITableViewDataSource
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ArtworkCell", for: indexPath)
         let artwork = artworks[indexPath.row]
-        cell.textLabel?.text = artwork.title
+        cell.textLabel?.text = artwork.imageId
         return cell
     }
     

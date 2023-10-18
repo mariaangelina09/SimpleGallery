@@ -10,6 +10,10 @@ import Foundation
 enum NetworkError: Error {
     case invalidURL
     case noData
+    case dataCorrupted
+    case keyNotFound
+    case valueNotFound
+    case typeMismatch
 }
 
 class NetworkManager {
@@ -31,61 +35,31 @@ class NetworkManager {
                 completion(nil, NetworkError.noData)
                 return
             }
-
+            
             do {
                 let decoder = JSONDecoder()
-                decoder.keyDecodingStrategy = .convertFromSnakeCase
-                decoder.dateDecodingStrategy = .secondsSince1970
-                
                 let artworkData = try decoder.decode(ArtworkData.self, from: data)
-                print(artworkData)
-                let artworks = artworkData.data.map { artwork in
-                    return Artwork(id: artwork.id,
-                                   title: artwork.title,
-                                   thumbnail: artwork.thumbnail,
-                                   artistDisplay: artwork.artistDisplay,
-                                   placeOfOrigin: artwork.placeOfOrigin,
-                                   dimensionsDetail: artwork.dimensionsDetail,
-                                   mediumDisplay: artwork.mediumDisplay,
-                                   creditLine: artwork.creditLine,
-                                   catalogueDisplay: artwork.catalogueDisplay,
-                                   publicationHistory: artwork.publicationHistory,
-                                   exhibitionHistory: artwork.exhibitionHistory,
-                                   provenanceText: artwork.provenanceText,
-                                   edition: artwork.edition,
-                                   publishingVerificationLevel: artwork.publishingVerificationLevel,
-                                   internalDepartmentID: artwork.internalDepartmentID,
-                                   copyrightNotice: artwork.copyrightNotice,
-                                   color: artwork.color,
-                                   onLoanDisplay: artwork.onLoanDisplay,
-                                   galleryTitle: artwork.galleryTitle,
-                                   galleryID: artwork.galleryID,
-                                   nomismaID: artwork.nomismaID,
-                                   artworkTypeTitle: artwork.artworkTypeTitle,
-                                   artworkTypeID: artwork.artworkTypeID,
-                                   departmentTitle: artwork.departmentTitle,
-                                   departmentID: artwork.departmentID,
-                                   artistID: artwork.artistID,
-                                   artistTitle: artwork.artistTitle,
-                                   termTitles: artwork.termTitles,
-                                   classificationID: artwork.classificationID,
-                                   classificationTitle: artwork.classificationTitle,
-                                   altClassificationIDS: artwork.altClassificationIDS,
-                                   classificationIDS: artwork.classificationIDS,
-                                   classificationTitles: artwork.classificationTitles,
-                                   materialID: artwork.materialID,
-                                   altMaterialIDS: artwork.altMaterialIDS,
-                                   materialIDS: artwork.materialIDS,
-                                   materialTitles: artwork.materialTitles,
-                                   imageID: artwork.imageID,
-                                   suggestAutocompleteAll: artwork.suggestAutocompleteAll,
-                                   sourceUpdatedAt: artwork.sourceUpdatedAt,
-                                   updatedAt: artwork.updatedAt,
-                                   timestamp: artwork.timestamp)
-                }
+                let artworks = artworkData.data
+                print(artworks)
 
                 completion(artworks, nil)
+            } catch let DecodingError.dataCorrupted(context) {
+                print(context)
+                completion(nil, NetworkError.dataCorrupted)
+            } catch let DecodingError.keyNotFound(key, context) {
+                print("Key '\(key)' not found:", context.debugDescription)
+                print("codingPath:", context.codingPath)
+                completion(nil, NetworkError.keyNotFound)
+            } catch let DecodingError.valueNotFound(value, context) {
+                print("Value '\(value)' not found:", context.debugDescription)
+                print("codingPath:", context.codingPath)
+                completion(nil, NetworkError.valueNotFound)
+            } catch let DecodingError.typeMismatch(type, context)  {
+                print("Type '\(type)' mismatch:", context.debugDescription)
+                print("codingPath:", context.codingPath)
+                completion(nil, NetworkError.typeMismatch)
             } catch {
+                print("Error:", error)
                 completion(nil, error)
             }
         }.resume()
@@ -113,55 +87,26 @@ class NetworkManager {
             
             do {
                 let decoder = JSONDecoder()
-                let response = try decoder.decode(ArtworkData.self, from: data)
-                
-                let artworks = artworkData.data.map { artwork in
-                    return Artwork(id: artwork.id,
-                                   title: artwork.title,
-                                   thumbnail: artwork.thumbnail,
-                                   artistDisplay: artwork.artistDisplay,
-                                   placeOfOrigin: artwork.placeOfOrigin,
-                                   dimensionsDetail: artwork.dimensionsDetail,
-                                   mediumDisplay: artwork.mediumDisplay,
-                                   creditLine: artwork.creditLine,
-                                   catalogueDisplay: artwork.catalogueDisplay,
-                                   publicationHistory: artwork.publicationHistory,
-                                   exhibitionHistory: artwork.exhibitionHistory,
-                                   provenanceText: artwork.provenanceText,
-                                   edition: artwork.edition,
-                                   publishingVerificationLevel: artwork.publishingVerificationLevel,
-                                   internalDepartmentID: artwork.internalDepartmentID,
-                                   copyrightNotice: artwork.copyrightNotice,
-                                   color: artwork.color,
-                                   onLoanDisplay: artwork.onLoanDisplay,
-                                   galleryTitle: artwork.galleryTitle,
-                                   galleryID: artwork.galleryID,
-                                   nomismaID: artwork.nomismaID,
-                                   artworkTypeTitle: artwork.artworkTypeTitle,
-                                   artworkTypeID: artwork.artworkTypeID,
-                                   departmentTitle: artwork.departmentTitle,
-                                   departmentID: artwork.departmentID,
-                                   artistID: artwork.artistID,
-                                   artistTitle: artwork.artistTitle,
-                                   termTitles: artwork.termTitles,
-                                   classificationID: artwork.classificationID,
-                                   classificationTitle: artwork.classificationTitle,
-                                   altClassificationIDS: artwork.altClassificationIDS,
-                                   classificationIDS: artwork.classificationIDS,
-                                   classificationTitles: artwork.classificationTitles,
-                                   materialID: artwork.materialID,
-                                   altMaterialIDS: artwork.altMaterialIDS,
-                                   materialIDS: artwork.materialIDS,
-                                   materialTitles: artwork.materialTitles,
-                                   imageID: artwork.imageID,
-                                   suggestAutocompleteAll: artwork.suggestAutocompleteAll,
-                                   sourceUpdatedAt: artwork.sourceUpdatedAt,
-                                   updatedAt: artwork.updatedAt,
-                                   timestamp: artwork.timestamp)
-                }
-                
+                let artworkData = try decoder.decode(ArtworkData.self, from: data)
+                let artworks = artworkData.data
                 completion(artworks, nil)
+            } catch let DecodingError.dataCorrupted(context) {
+                print(context)
+                completion(nil, NetworkError.dataCorrupted)
+            } catch let DecodingError.keyNotFound(key, context) {
+                print("Key '\(key)' not found:", context.debugDescription)
+                print("codingPath:", context.codingPath)
+                completion(nil, NetworkError.keyNotFound)
+            } catch let DecodingError.valueNotFound(value, context) {
+                print("Value '\(value)' not found:", context.debugDescription)
+                print("codingPath:", context.codingPath)
+                completion(nil, NetworkError.valueNotFound)
+            } catch let DecodingError.typeMismatch(type, context)  {
+                print("Type '\(type)' mismatch:", context.debugDescription)
+                print("codingPath:", context.codingPath)
+                completion(nil, NetworkError.typeMismatch)
             } catch {
+                print("Error:", error)
                 completion(nil, error)
             }
         }.resume()
