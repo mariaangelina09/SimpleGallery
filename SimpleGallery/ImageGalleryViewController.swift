@@ -14,7 +14,6 @@ class ImageGalleryViewController: UIViewController {
     
     var searchBar: UISearchBar!
     var collectionView: UICollectionView!
-    let tableView = UITableView()
     
     let searchController = UISearchController(searchResultsController: nil)
     var searchQuery: String = ""
@@ -23,7 +22,6 @@ class ImageGalleryViewController: UIViewController {
         super.viewDidLoad()
         
 //        setupSearchController()
-//        setupTableView()
         
         setupSearchBar()
         setupCollectionView()
@@ -60,13 +58,6 @@ class ImageGalleryViewController: UIViewController {
         view.addSubview(collectionView)
     }
     
-    func setupTableView() {
-//        tableView.delegate = self
-//        tableView.dataSource = self
-//        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "ArtworkCell")
-//        view.addSubview(tableView)
-    }
-    
     func searchArtworks() {
         URLSession.shared.getAllTasks { tasks in
             tasks.forEach { $0.cancel() }
@@ -78,7 +69,7 @@ class ImageGalleryViewController: UIViewController {
                 return
             }
             self?.artworks = artworks
-            self?.tableView.reloadData()
+            self?.collectionView.reloadData()
         }
     }
     
@@ -126,6 +117,13 @@ extension ImageGalleryViewController: UICollectionViewDataSource, UICollectionVi
         return cell
     }
     
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        let totalHeight: CGFloat = ((self.view.frame.height - self.searchBar.frame.height) / 6)
+        let totalWidth: CGFloat = (self.view.frame.width / 3.2)
+
+        return CGSize(width: totalWidth, height: totalHeight)
+    }
+    
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let offsetY = scrollView.contentOffset.y
         let contentHeight = scrollView.contentSize.height
@@ -135,26 +133,4 @@ extension ImageGalleryViewController: UICollectionViewDataSource, UICollectionVi
             loadArtworks()
         }
     }
-}
-
-extension ImageGalleryViewController: UITableViewDelegate, UITableViewDataSource {
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return artworks.count
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "ArtworkCell", for: indexPath)
-        let artwork = artworks[indexPath.row]
-        cell.textLabel?.text = artwork.imageId
-        return cell
-    }
-    
-    //    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-    //        let offsetY = scrollView.contentOffset.y
-    //        let contentHeight = scrollView.contentSize.height
-    //
-    //        if offsetY > contentHeight - scrollView.frame.size.height {
-    //            loadArtworks()
-    //        }
-    //    }
 }
