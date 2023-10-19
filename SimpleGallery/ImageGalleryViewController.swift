@@ -44,6 +44,13 @@ class ImageGalleryViewController: UIViewController {
         return collectionView
     }()
     
+    let loadingIndicator: UIActivityIndicatorView = {
+        let indicator = UIActivityIndicatorView(style: .large)
+        indicator.translatesAutoresizingMaskIntoConstraints = false
+        indicator.hidesWhenStopped = true
+        return indicator
+    }()
+    
     // MARK: - Override Function(s)
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -62,8 +69,11 @@ class ImageGalleryViewController: UIViewController {
         view.backgroundColor = .systemBackground
         
         view.addSubview(collectionView)
+        view.addSubview(loadingIndicator)
         
         NSLayoutConstraint.activate([
+            loadingIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            loadingIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             collectionView.topAnchor.constraint(equalTo: view.topAnchor),
             collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
@@ -94,14 +104,18 @@ class ImageGalleryViewController: UIViewController {
     }
     
     private func loadArtworks() {
+        loadingIndicator.startAnimating()
+        
         NetworkManager.fetchArtworks(page: currentPage, limit: itemsPerPage) { [weak self] (artworks, error) in
             guard let artworks = artworks else {
                 print("Error Fetching Artworks: \(error)")
+                self?.loadingIndicator.stopAnimating()
                 return
             }
             self?.artworks += artworks
             
             DispatchQueue.main.async {
+                self?.loadingIndicator.stopAnimating()
                 self?.collectionView.reloadData()
             }
         }
