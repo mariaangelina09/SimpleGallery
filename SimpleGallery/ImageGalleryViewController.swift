@@ -8,57 +8,74 @@
 import UIKit
 
 class ImageGalleryViewController: UIViewController {
-    var artworks: [Artwork] = []
-    var currentPage = 1
-    let itemsPerPage = 15
+    // MARK: - Variable(s)
+    private var artworks: [Artwork] = []
+    private var currentPage = 1
+    private let itemsPerPage = 15
+    private var searchQuery: String = ""
     
-    var searchBar: UISearchBar!
-    var collectionView: UICollectionView!
+    private lazy var searchBarHeader: UISearchBar = {
+        let s = UISearchBar()
+        s.placeholder = "Search Artwork"
+        s.delegate = self
+        s.backgroundColor = .white
+        s.backgroundImage = UIImage()
+        s.tintColor = .black
+        s.barTintColor = .black
+        s.barStyle = .default
+        s.sizeToFit()
+        return s
+    }()
     
-    let searchController = UISearchController(searchResultsController: nil)
-    var searchQuery: String = ""
+    private lazy var collectionView: UICollectionView = {
+        let layout = UICollectionViewFlowLayout()
+        layout.scrollDirection = .vertical
+        
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        collectionView.backgroundColor = .white
+        
+        collectionView.delegate = self
+        collectionView.dataSource = self
+        
+        collectionView.register(ArtworkCell.self, forCellWithReuseIdentifier: "ArtworkCell")
+        collectionView.register(UICollectionViewCell.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "HeaderCell")
+        
+        return collectionView
+    }()
     
+    // MARK: - Override Function(s)
     override func viewDidLoad() {
         super.viewDidLoad()
         
-//        setupSearchController()
-        
-        setupSearchBar()
-        setupCollectionView()
-        
-        loadArtworks()
+        setupUI()
+        setupData()
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
     }
     
-    func setupSearchBar() {
-        searchBar = UISearchBar()
-        searchBar.delegate = self
-        searchBar.placeholder = "Search Artworks"
-        view.addSubview(searchBar)
-    }
-    
-    func setupSearchController() {
-        searchController.searchResultsUpdater = self
-        searchController.obscuresBackgroundDuringPresentation = false
-        searchController.searchBar.placeholder = "Search Artworks"
-        navigationItem.searchController = searchController
-        definesPresentationContext = true
-    }
-    
-    func setupCollectionView() {
-        let layout = UICollectionViewFlowLayout()
-        collectionView = UICollectionView(frame: view.frame, collectionViewLayout: layout)
-        collectionView.delegate = self
-        collectionView.dataSource = self
-        collectionView.register(ArtworkCell.self, forCellWithReuseIdentifier: "ArtworkCell")
-        collectionView.backgroundColor = .white
+    // MARK: - Setup UI
+    private func setupUI() {
+        title = "Artworks Gallery"
+        
         view.addSubview(collectionView)
+        
+        NSLayoutConstraint.activate([
+            collectionView.topAnchor.constraint(equalTo: view.topAnchor),
+            collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
     }
     
-    func searchArtworks() {
+    private func setupData() {
+        loadArtworks()
+    }
+    
+    // MARK: - Fetch Data
+    private func searchArtworks() {
         URLSession.shared.getAllTasks { tasks in
             tasks.forEach { $0.cancel() }
         }
@@ -69,18 +86,19 @@ class ImageGalleryViewController: UIViewController {
                 return
             }
             self?.artworks = artworks
-            self?.collectionView.reloadData()
+            DispatchQueue.main.async {
+                self?.collectionView.reloadData()
+            }
         }
     }
     
-    func loadArtworks() {
+    private func loadArtworks() {
         NetworkManager.fetchArtworks(page: currentPage, limit: itemsPerPage) { [weak self] (artworks, error) in
             guard let artworks = artworks else {
                 // Handle error
                 return
             }
             self?.artworks += artworks
-            self?.currentPage += 1
             
             DispatchQueue.main.async {
                 self?.collectionView.reloadData()
@@ -89,22 +107,22 @@ class ImageGalleryViewController: UIViewController {
     }
 }
 
+// MARK: - UISearchBarDelegate
 extension ImageGalleryViewController: UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        guard !searchText.isEmpty else {
+            artworks = []
+            loadArtworks()
+            
+            return
+        }
+        
         searchQuery = searchText
         searchArtworks()
     }
 }
 
-extension ImageGalleryViewController: UISearchResultsUpdating {
-    func updateSearchResults(for searchController: UISearchController) {
-        if let searchText = searchController.searchBar.text {
-            searchQuery = searchText
-            searchArtworks()
-        }
-    }
-}
-
+// MARK: - UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout
 extension ImageGalleryViewController: UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return artworks.count
@@ -118,13 +136,31 @@ extension ImageGalleryViewController: UICollectionViewDataSource, UICollectionVi
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        let totalHeight: CGFloat = ((self.view.frame.height - self.searchBar.frame.height) / 6)
+        let totalHeight: CGFloat = ((self.view.frame.height - self.searchBarHeader.frame.height) / 6)
         let totalWidth: CGFloat = (self.view.frame.width / 3.2)
 
         return CGSize(width: totalWidth, height: totalHeight)
     }
     
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
+        return CGSize(width: view.frame.width, height: 60)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+        let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "HeaderCell", for: indexPath)
+        header.addSubview(searchBarHeader)
+        searchBarHeader.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            searchBarHeader.leftAnchor.constraint(equalTo: header.leftAnchor),
+            searchBarHeader.rightAnchor.constraint(equalTo: header.rightAnchor),
+            searchBarHeader.topAnchor.constraint(equalTo: header.topAnchor),
+            searchBarHeader.bottomAnchor.constraint(equalTo: header.bottomAnchor, constant: -20)
+        ])
+        return header
+    }
+    
+    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
         let offsetY = scrollView.contentOffset.y
         let contentHeight = scrollView.contentSize.height
         
