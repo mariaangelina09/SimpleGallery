@@ -25,7 +25,7 @@ class ArtworkCell: UICollectionViewCell {
     }
 
     func configure(with artwork: Artwork) {
-        guard let imageURL = URL(string: "https://www.artic.edu/iiif/2/\(artwork.imageId)/full/843,/0/default.jpg") else {
+        guard let imageURL = URL(string: "https://www.artic.edu/iiif/2/\(artwork.imageID)/full/843,/0/default.jpg") else {
             return
         }
         
