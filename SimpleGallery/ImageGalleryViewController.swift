@@ -59,6 +59,7 @@ class ImageGalleryViewController: UIViewController {
     // MARK: - Setup UI
     private func setupUI() {
         title = "Artworks Gallery"
+        view.backgroundColor = .systemBackground
         
         view.addSubview(collectionView)
         
@@ -82,7 +83,7 @@ class ImageGalleryViewController: UIViewController {
         
         NetworkManager.searchArtworks(query: searchQuery) { [weak self] (artworks, error) in
             guard let artworks = artworks, error == nil else {
-                // Handle error
+                print("Error Searching Artworks: \(error)")
                 return
             }
             self?.artworks = artworks
@@ -95,13 +96,29 @@ class ImageGalleryViewController: UIViewController {
     private func loadArtworks() {
         NetworkManager.fetchArtworks(page: currentPage, limit: itemsPerPage) { [weak self] (artworks, error) in
             guard let artworks = artworks else {
-                // Handle error
+                print("Error Fetching Artworks: \(error)")
                 return
             }
             self?.artworks += artworks
             
             DispatchQueue.main.async {
                 self?.collectionView.reloadData()
+            }
+        }
+    }
+    
+    private func fetchArtworkDetail(_ artworkId: Int) {
+        NetworkManager.fetchArtworkDetail(id: artworkId) { [weak self] (artworkDetail, error) in
+            guard let artworkDetail = artworkDetail else {
+                print("Error Fetching Artwork Detail: \(error)")
+                return
+            }
+            
+            DispatchQueue.main.async {
+                let imageGalleryDetailViewController = ImageGalleryDetailViewController()
+                imageGalleryDetailViewController.artworkDetail = artworkDetail
+                
+                self?.navigationController?.pushViewController(imageGalleryDetailViewController, animated: true)
             }
         }
     }
@@ -168,5 +185,13 @@ extension ImageGalleryViewController: UICollectionViewDataSource, UICollectionVi
             currentPage += 1
             loadArtworks()
         }
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        guard artworks[indexPath.item].id != 0 else {
+            return
+        }
+        
+        fetchArtworkDetail(artworks[indexPath.item].id)
     }
 }

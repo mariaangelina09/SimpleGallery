@@ -107,7 +107,7 @@ struct ArtworkDetailData: Decodable {
 // MARK: - ArtworkDetail
 struct ArtworkDetail: Decodable {
     let id: Int
-    let dateDisplay, artistDisplay, placeOfOrigin, artworkDescription, dimensions, mediumDisplay, creditLine, imageID: String
+    let dateDisplay, artistDisplay, placeOfOrigin, artworkDescription, dimensions, mediumDisplay, creditLine, imageID, title: String
     
     let artworkTypeID: Int
     let artworkTypeTitle: String
@@ -121,7 +121,7 @@ struct ArtworkDetail: Decodable {
     let sourceUpdatedAt, updatedAt, timestamp: String
     
     enum CodingKeys: String, CodingKey {
-        case id, dimensions, timestamp
+        case id, dimensions, title, timestamp
         case dateDisplay = "date_display"
         case artistDisplay = "artist_display"
         case placeOfOrigin = "place_of_origin"
@@ -154,6 +154,7 @@ struct ArtworkDetail: Decodable {
         
         id = try container.decode(Int.self, forKey: .id)
         dimensions = (try? container.decode(String.self, forKey: .dimensions)) ?? ""
+        title = (try? container.decode(String.self, forKey: .title)) ?? ""
         dateDisplay = (try? container.decode(String.self, forKey: .dateDisplay)) ?? ""
         artistDisplay = (try? container.decode(String.self, forKey: .artistDisplay)) ?? ""
         placeOfOrigin = (try? container.decode(String.self, forKey: .placeOfOrigin)) ?? ""

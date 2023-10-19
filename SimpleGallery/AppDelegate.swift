@@ -15,6 +15,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         window = UIWindow(frame: UIScreen.main.bounds)
         
+        UINavigationBar.appearance().tintColor = .black
+        
         let rootVC = ImageGalleryViewController()
         let rootNC = UINavigationController(rootViewController: rootVC)
         window?.rootViewController = rootNC
